@@ -31,3 +31,19 @@ The output should look like this:
 {"eventTime": "2023-01-23T10:15:23.979862", "eventId": "bf061b6c-b03d-43d7-9d04-f4f8c71a9ab0", "userId": "0a9f8527-a2b4-4c5f-b82b-2a3930182c62", "name": "Julie Grant", "lat": "35.6910", "lng": "139.7679", "city": "Tokyo", "region": "Tokyo", "action": "Join"}
 {"eventTime": "2023-01-23T10:15:24.075753", "eventId": "868320eb-96b2-496f-af72-9cd83d9726c0", "userId": "fc20e945-f4ce-4c71-9a55-8f7253583c1c", "name": "Natalie Martinez", "lat": "39.9690", "lng": "-83.0114", "city": "Columbus", "region": "Ohio", "action": "Join"}
 ```
+
+## Ingesting into Apache Kafka
+
+If you want to ingest those events into a data streaming platform like Kafka, you can do so using the [jq](https://stedolan.github.io/jq/) and [kcat](https://docs.confluent.io/platform/current/app-development/kafkacat-usage.html) command line tools:
+
+```bash
+python loop.py \
+  --timeout 1 \
+  --users 1000 \
+  --events 100 \
+  --max-start-delay 0 \
+  --min-event-length 60 \
+  --max-event-length 180 |
+jq -cr --arg sep 😊 '[.eventId, tostring] | join($sep)' |
+kcat -P -b localhost:9092 -t events -K😊
+```
